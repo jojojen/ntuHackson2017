@@ -4,12 +4,11 @@ mainDir <- "/Users/jen/Documents/ntuHackson2017"
 setwd(mainDir)
 
 # install packages
-pkgs.needs <- c("ggmap", "mapproj", "jsonlite", "dplyr")
+pkgs.needs <- c("ggmap", "jsonlite", "dplyr")
 pkgs.installed <- installed.packages()[,"Package"] 
 new.pkgs <- pkgs.needs[!(pkgs.needs %in% pkgs.installed)]
 if(length(new.packages)) install.packages(new.pkgs)
 library(ggmap)
-library(mapproj)
 library(jsonlite)
 library(dplyr)
 
@@ -23,11 +22,15 @@ for (i in c(1:length(json$retVal))){
 df$tot <- df$tot %>% as.character %>% as.numeric
 df$lng <- df$lng %>% as.character %>% as.numeric
 df$lat <- df$lat %>% as.character %>% as.numeric
-
+df$bikes <- df$sbi
+df$space <- df$bemp
 # ploting
 map <- get_map(location = 'Taipei', zoom = 12)
-ggmap(map) + geom_point(aes(x = lng, y = lat, size = tot), data = df)
-
+ggmap(map, darken = 0.5) + 
+  geom_point(aes(x = lng, y = lat, size = 1, colour = I('red1')), data = df %>% subset(bikes == 0)) +
+  geom_point(aes(x = lng, y = lat, size = 1, colour = I('cyan')), data = df %>% subset(space == 0)) +
+  geom_point(aes(x = lng, y = lat, size = 1, colour = I('gray')), data = df %>% subset(bikes != 0 & space != 0)) +
+  scale_size_continuous(range = c(0,2))
+dev.off()
 # output data and restore env
-write.csv(df, "result.csv")
 setwd(oriDir)
